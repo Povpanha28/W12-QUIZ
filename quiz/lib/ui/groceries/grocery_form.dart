@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/grocery.dart';
@@ -12,7 +13,6 @@ class NewItem extends StatefulWidget {
 }
 
 class _NewItemState extends State<NewItem> {
-
   // Default settings
   static const defautName = "New grocery";
   static const defaultQuantity = 1;
@@ -28,8 +28,7 @@ class _NewItemState extends State<NewItem> {
     super.initState();
 
     // Initialize intputs with default settings
-    _nameController.text = defautName;
-    _quantityController.text = defaultQuantity.toString();
+    setDefault();
   }
 
   @override
@@ -41,12 +40,28 @@ class _NewItemState extends State<NewItem> {
     _quantityController.dispose();
   }
 
+  void setDefault() {
+    setState(() {
+      _nameController.text = defautName;
+      _quantityController.text = defaultQuantity.toString();
+      _selectedCategory = defaultCategory;
+    });
+  }
+
   void onReset() {
     // Will be implemented later - Reset all fields to the initial values
+    setDefault();
   }
 
   void onAdd() {
     // Will be implemented later - Create and return the new grocery
+    Grocery newGrocery = Grocery(
+      id: "d",
+      name: _nameController.text,
+      quantity: int.parse(_quantityController.text),
+      category: _selectedCategory,
+    );
+    Navigator.pop(context, newGrocery);
   }
 
   @override
@@ -76,7 +91,32 @@ class _NewItemState extends State<NewItem> {
                 Expanded(
                   child: DropdownButtonFormField<GroceryCategory>(
                     initialValue: _selectedCategory,
-                    items: [  ],
+                    items: GroceryCategory.values
+                        .map<DropdownMenuItem<GroceryCategory>>((
+                          GroceryCategory category,
+                        ) {
+                          return DropdownMenuItem(
+                            value: category,
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 2,
+                                    right: 5,
+                                  ),
+                                  child: Container(
+                                    width: 15,
+                                    height: 15,
+                                    color: category.color,
+                                  ),
+                                ),
+
+                                Text(category.label),
+                              ],
+                            ),
+                          );
+                        })
+                        .toList(),
                     onChanged: (value) {
                       if (value != null) {
                         setState(() {
@@ -93,10 +133,7 @@ class _NewItemState extends State<NewItem> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(onPressed: onReset, child: const Text('Reset')),
-                ElevatedButton(
-                  onPressed: onAdd,
-                  child: const Text('Add Item'),
-                ),
+                ElevatedButton(onPressed: onAdd, child: const Text('Add Item')),
               ],
             ),
           ],
